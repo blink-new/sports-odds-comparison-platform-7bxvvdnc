@@ -4,10 +4,10 @@ import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import { HeroSection } from './components/hero/HeroSection'
 import { OddsTable } from './components/odds/OddsTable'
-import { RealTimeStatus } from './components/odds/RealTimeStatus'
+import { DataSourceStatus } from './components/odds/DataSourceStatus'
 import { FeaturesSection } from './components/features/FeaturesSection'
 import { PricingSection } from './components/pricing/PricingSection'
-import { useOddsData } from './hooks/useOddsData'
+import { useCombinedOdds } from './hooks/useCombinedOdds'
 import { subscriptionTiers } from './data/mockData'
 import { User } from './types'
 
@@ -15,7 +15,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   
-  // Real-time odds data
+  // Combined odds data from multiple sources
   const {
     events,
     bookmakers,
@@ -24,11 +24,13 @@ function App() {
     lastUpdated,
     nextUpdate,
     rateLimitRemaining,
+    sources,
     refreshData,
-    isRealTime
-  } = useOddsData({
+    isRealTime,
+    testSources
+  } = useCombinedOdds({
     autoRefresh: true,
-    refreshInterval: 5 * 60 * 1000 // 5 minutes
+    refreshInterval: 2 * 60 * 1000 // 2 minutes for combined data
   })
 
   useEffect(() => {
@@ -90,14 +92,16 @@ function App() {
         
         <section id="odds" className="py-16">
           <div className="container mx-auto px-4 space-y-6">
-            <RealTimeStatus
-              isRealTime={isRealTime}
-              loading={oddsLoading}
-              error={oddsError}
+            <DataSourceStatus
+              sources={sources}
               lastUpdated={lastUpdated}
               nextUpdate={nextUpdate}
               rateLimitRemaining={rateLimitRemaining}
+              isRealTime={isRealTime}
               onRefresh={refreshData}
+              onTestSources={testSources}
+              loading={oddsLoading}
+              error={oddsError}
             />
             
             <OddsTable 
